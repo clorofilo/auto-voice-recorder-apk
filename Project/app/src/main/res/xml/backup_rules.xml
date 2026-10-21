@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
+   Auto Backup rules for Android 11 (API 30) and lower; API 31+ uses
+   data_extraction_rules.xml instead. Keep both files in sync.
    See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+
+   Excluded:
+   - app_lock_prefs.xml: EncryptedSharedPreferences (PIN hash + Drive sync flag).
+     Its master key lives in the Android Keystore, which is never backed up, so a
+     restored copy can't be decrypted and crashes the app on first read.
+   - recordings.db (+ journal files) and files/recordings/: the recordings are
+     private audio and are backed up only through the app's own Drive sync.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="sharedpref" path="app_lock_prefs.xml" />
+    <exclude domain="database" path="recordings.db" />
+    <exclude domain="database" path="recordings.db-shm" />
+    <exclude domain="database" path="recordings.db-wal" />
+    <exclude domain="database" path="recordings.db-journal" />
+    <exclude domain="file" path="recordings/" />
 </full-backup-content>
