@@ -1,7 +1,11 @@
 package com.example.auto_voice_recorder.ui.navigation
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
@@ -70,16 +74,23 @@ fun AppNavHost(container: AppContainer, modifier: Modifier = Modifier) {
                     }
                 },
             )
-            Box(modifier = Modifier.fillMaxSize()) {
-                RecordingsListScreen(viewModel = viewModel)
-                Button(
-                    onClick = { navController.navigate(ROUTE_SETTINGS) },
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(16.dp),
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Ajustes")
+                    Button(onClick = { navController.navigate(ROUTE_SETTINGS) }) {
+                        Text("Ajustes")
+                    }
                 }
+                RecordingsListScreen(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
 
@@ -91,16 +102,23 @@ fun AppNavHost(container: AppContainer, modifier: Modifier = Modifier) {
                     }
                 },
             )
-            Box(modifier = Modifier.fillMaxSize()) {
-                SettingsScreen(viewModel = viewModel)
-                OutlinedButton(
-                    onClick = { navController.popBackStack() },
+            Column(modifier = Modifier.fillMaxSize()) {
+                Row(
                     modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp),
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Volver")
+                    OutlinedButton(onClick = { navController.popBackStack() }) {
+                        Text("Volver")
+                    }
                 }
+                SettingsScreen(
+                    viewModel = viewModel,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
