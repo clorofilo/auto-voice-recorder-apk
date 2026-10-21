@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.auto_voice_recorder"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
