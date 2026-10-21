@@ -1,47 +1,29 @@
 package com.example.auto_voice_recorder
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.fragment.app.FragmentActivity
+import com.example.auto_voice_recorder.ui.navigation.AppNavHost
 import com.example.auto_voice_recorder.ui.theme.AutovoicerecorderTheme
 
-class MainActivity : ComponentActivity() {
+/**
+ * Extends [FragmentActivity] (not [ComponentActivity]) because [LockScreen]'s biometric
+ * unlock button requires casting the context to a [FragmentActivity] to drive
+ * [androidx.biometric.BiometricPrompt]; a plain ComponentActivity makes that cast fail
+ * and silently hides the biometric button.
+ */
+class MainActivity : FragmentActivity() {
+
+    private val container by lazy { AppContainer(applicationContext) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AutovoicerecorderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavHost(container = container)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AutovoicerecorderTheme {
-        Greeting("Android")
     }
 }
