@@ -17,6 +17,11 @@ import com.example.auto_voice_recorder.R
 import com.example.auto_voice_recorder.audio.MediaRecorderController
 import com.example.auto_voice_recorder.data.AppDatabase
 import com.example.auto_voice_recorder.data.RecordingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -42,25 +47,37 @@ class RecordingService : Service() {
         )
     }
 
+    /**
+     * Background scope for orchestrator calls, so Room I/O inside
+     * [RecordingOrchestrator] never blocks the service's main thread.
+     */
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START_RECORDING -> {
+                // Must happen synchronously on the main thread, promptly after
+                // onStartCommand — Android requires it, so it is not launched
+                // into the background scope below.
                 startForegroundWithNotification()
-                orchestrator.start()
+                serviceScope.launch { orchestrator.start() }
             }
 
             ACTION_STOP_RECORDING -> {
-                orchestrator.stop()
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
+                serviceScope.launch {
+                    orchestrator.stop()
+                    stopForeground(STOP_FOREGROUND_REMOVE)
+                    stopSelf()
+                }
             }
         }
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         recorder.release()
         super.onDestroy()
     }
