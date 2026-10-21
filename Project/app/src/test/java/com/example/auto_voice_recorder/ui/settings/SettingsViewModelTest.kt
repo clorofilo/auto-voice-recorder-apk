@@ -4,6 +4,7 @@ import com.example.auto_voice_recorder.data.FakeRecordingDao
 import com.example.auto_voice_recorder.data.RecordingsRepository
 import com.example.auto_voice_recorder.data.SyncState
 import com.example.auto_voice_recorder.security.PinManager
+import com.example.auto_voice_recorder.security.PinValidation
 import com.example.auto_voice_recorder.sync.SyncPreferences
 import com.example.auto_voice_recorder.ui.lock.FakePinManager
 import kotlinx.coroutines.Dispatchers
@@ -99,9 +100,32 @@ class SettingsViewModelTest {
         val pinManager = FakePinManager(pin = "1234")
         val viewModel = newViewModel(pinManager = pinManager)
 
-        viewModel.changePin("5678")
+        val result = viewModel.changePin("5678", "5678")
 
+        assertEquals(PinValidation.OK, result)
         assertTrue(pinManager.verifyPin("5678"))
         assertFalse(pinManager.verifyPin("1234"))
+    }
+
+    @Test
+    fun `changePin with a mismatched confirmation keeps the old PIN`() {
+        val pinManager = FakePinManager(pin = "1234")
+        val viewModel = newViewModel(pinManager = pinManager)
+
+        val result = viewModel.changePin("5678", "5679")
+
+        assertEquals(PinValidation.MISMATCH, result)
+        assertTrue(pinManager.verifyPin("1234"))
+    }
+
+    @Test
+    fun `changePin with a too-short PIN keeps the old PIN`() {
+        val pinManager = FakePinManager(pin = "1234")
+        val viewModel = newViewModel(pinManager = pinManager)
+
+        val result = viewModel.changePin("12", "12")
+
+        assertEquals(PinValidation.TOO_SHORT, result)
+        assertTrue(pinManager.verifyPin("1234"))
     }
 }

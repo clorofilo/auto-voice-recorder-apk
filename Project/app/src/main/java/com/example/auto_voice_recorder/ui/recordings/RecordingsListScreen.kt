@@ -44,6 +44,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.example.auto_voice_recorder.ui.lock.AppLockController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -96,6 +97,8 @@ fun RecordingsListScreen(
         if (missing.isEmpty()) return false
         openSettingsIfMicDenied = userInitiated
         micRationaleBeforeRequest = shouldShowMicRationale(activity)
+        // The system permission dialog must not count as leaving the app.
+        AppLockController.process.skipNextBackgroundRelock()
         permissionLauncher.launch(missing.toTypedArray())
         return true
     }

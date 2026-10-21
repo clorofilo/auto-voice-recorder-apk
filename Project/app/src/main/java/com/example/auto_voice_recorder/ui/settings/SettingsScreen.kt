@@ -33,7 +33,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.auto_voice_recorder.security.PinRules
+import com.example.auto_voice_recorder.security.PinValidation
 import com.example.auto_voice_recorder.sync.GoogleSignInHelper
+import com.example.auto_voice_recorder.ui.lock.AppLockController
 
 /**
  * Settings screen: Drive sync toggle (gated by Google Sign-In), PIN change, and a link
@@ -49,6 +52,9 @@ fun SettingsScreen(
     val activity = context as? Activity
     val googleSignInHelper = remember(context) { GoogleSignInHelper(context) }
     var newPin by rememberSaveable { mutableStateOf("") }
+    var confirmPin by rememberSaveable { mutableStateOf("") }
+    // (message, isError) shown under the PIN fields after an update attempt.
+    var pinMessage by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -62,6 +68,9 @@ fun SettingsScreen(
     // same sign-in flow instead of duplicating it.
     fun launchGoogleSignIn() {
         if (activity != null) {
+            // Returning from the sign-in activity must not relock the app, or the
+            // result callback above would be lost along with this screen.
+            AppLockController.process.skipNextBackgroundRelock()
             googleSignInHelper.signIn(activity, signInLauncher)
         }
     }
@@ -114,19 +123,41 @@ fun SettingsScreen(
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = newPin,
-            onValueChange = { newPin = it },
-            label = { Text("Nuevo PIN") },
+            onValueChange = { newPin = it.filter(Char::isDigit); pinMessage = null },
+            label = { Text("Nuevo PIN (mín. ${PinRules.MIN_LENGTH} dígitos)") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = confirmPin,
+            onValueChange = { confirmPin = it.filter(Char::isDigit); pinMessage = null },
+            label = { Text("Repite el nuevo PIN") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        pinMessage?.let { (text, isError) ->
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = text,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
         Button(
             onClick = {
-                viewModel.changePin(newPin)
-                newPin = ""
+                val result = viewModel.changePin(newPin, confirmPin)
+                pinMessage = PinRules.errorMessage(result)?.let { it to true }
+                    ?: ("PIN actualizado" to false)
+                if (result == PinValidation.OK) {
+                    newPin = ""
+                    confirmPin = ""
+                }
             },
-            enabled = newPin.isNotEmpty(),
+            enabled = newPin.isNotEmpty() && confirmPin.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Actualizar PIN")
