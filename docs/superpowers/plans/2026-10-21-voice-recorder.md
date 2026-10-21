@@ -394,10 +394,11 @@ git commit -m "feat: add recordings list and playback UI"
 **Files:**
 - Create: `Project/app/src/main/java/com/example/auto_voice_recorder/ui/settings/SettingsViewModel.kt`
 - Create: `Project/app/src/main/java/com/example/auto_voice_recorder/ui/settings/SettingsScreen.kt`
+- Modify: `Project/app/src/main/java/com/example/auto_voice_recorder/service/RecordingService.kt` (replace the stubbed `syncEnabled` lambda from Task 3)
 - Test: `Project/app/src/test/java/com/example/auto_voice_recorder/ui/settings/SettingsViewModelTest.kt`
 
 **Interfaces:**
-- Consumes: `SyncPreferences` (Task 6), `PinManager` (Task 5).
+- Consumes: `SyncPreferences` (Task 6), `PinManager` (Task 5), `RecordingService` (Task 3: its stubbed `syncEnabled` lambda).
 - Produces: `class SettingsViewModel(private val syncPreferences: SyncPreferences, private val pinManager: PinManager) : ViewModel()` with `val isDriveSyncEnabled: StateFlow<Boolean>`, `fun setDriveSyncEnabled(enabled: Boolean)`, `fun changePin(newPin: String)`.
 
 - [ ] **Step 1: Write a `FakeSyncPreferences`** (test-only, implements `SyncPreferences` in-memory).
@@ -416,11 +417,12 @@ Expected: FAIL
 Run: `cd Project && ./gradlew :app:testDebugUnitTest --tests "*SettingsViewModelTest*"`
 Expected: PASS
 
-- [ ] **Step 6: Implement `SettingsScreen` Composable** (switch bound to `isDriveSyncEnabled`/`setDriveSyncEnabled`, a "Conectar con Google" button calling `GoogleSignInHelper.signIn` from Task 6 before enabling sync, a PIN-change field calling `changePin`, and a button that opens `Settings.ACTION_ACCESSIBILITY_SETTINGS` with a line of plain-language text telling the user to enable "Auto Voice Recorder" there). Not unit tested (Compose UI, verified manually).
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Modify `RecordingService` (Task 3)** so its `syncEnabled` lambda reads the real preference instead of the stub: `syncEnabled = { DefaultSyncPreferences(EncryptedPrefsFactory().create(applicationContext)).isEnabled() }`.
+- [ ] **Step 7: Implement `SettingsScreen` Composable** (switch bound to `isDriveSyncEnabled`/`setDriveSyncEnabled`, a "Conectar con Google" button calling `GoogleSignInHelper.signIn` from Task 6 before enabling sync, a PIN-change field calling `changePin`, and a button that opens `Settings.ACTION_ACCESSIBILITY_SETTINGS` with a line of plain-language text telling the user to enable "Auto Voice Recorder" there). Not unit tested (Compose UI, verified manually).
+- [ ] **Step 8: Commit**
 
 ```bash
-git add Project/app/src/main/java/com/example/auto_voice_recorder/ui/settings Project/app/src/test/java/com/example/auto_voice_recorder/ui/settings
+git add Project/app/src/main/java/com/example/auto_voice_recorder/ui/settings Project/app/src/test/java/com/example/auto_voice_recorder/ui/settings Project/app/src/main/java/com/example/auto_voice_recorder/service/RecordingService.kt
 git commit -m "feat: add settings UI for Drive sync, PIN and accessibility link"
 ```
 
@@ -435,10 +437,10 @@ git commit -m "feat: add settings UI for Drive sync, PIN and accessibility link"
 
 **Interfaces:**
 - Consumes: every ViewModel/repository/manager produced in Tasks 2–9.
-- Produces: `class AppContainer(context: Context)` exposing lazily-built singletons: `val database: AppDatabase`, `val recordingsRepository: RecordingsRepository`, `val pinManager: PinManager`, `val syncPreferences: SyncPreferences`; `@Composable fun AppNavHost(container: AppContainer)` with routes `"lock"` → `"recordings"` ↔ `"settings"`.
+- Produces: `class AppContainer(context: Context)` exposing lazily-built singletons: `val database: AppDatabase`, `val recordingsRepository: RecordingsRepository`, `val pinManager: PinManager`, `val syncPreferences: SyncPreferences`, `val systemStatusChecker: SystemStatusChecker`; `@Composable fun AppNavHost(container: AppContainer)` with routes `"lock"` → `"recordings"` ↔ `"settings"`.
 
-- [ ] **Step 1: Implement `AppContainer`** building `AppDatabase` (Room, `Room.databaseBuilder`), `RecordingsRepository(database.recordingDao())`, `DefaultPinManager(EncryptedPrefsFactory().create(context))`, `DefaultSyncPreferences(EncryptedPrefsFactory().create(context))`.
-- [ ] **Step 2: Implement `AppNavHost`** using `androidx.navigation.compose.NavHost`: start destination `"lock"` rendering `LockScreen` wired to `LockViewModel(container.pinManager)`, navigating to `"recordings"` on `LockUiState.Unlocked`; `"recordings"` renders `RecordingsListScreen` wired to `RecordingsViewModel(container.recordingsRepository, RecordingStatus.isRecording)` with a button to `"settings"`; `"settings"` renders `SettingsScreen` wired to `SettingsViewModel(container.syncPreferences, container.pinManager)`.
+- [ ] **Step 1: Implement `AppContainer`** building `AppDatabase` (Room, `Room.databaseBuilder`), `RecordingsRepository(database.recordingDao())`, `DefaultPinManager(EncryptedPrefsFactory().create(context))`, `DefaultSyncPreferences(EncryptedPrefsFactory().create(context))`, `DefaultSystemStatusChecker(context)`.
+- [ ] **Step 2: Implement `AppNavHost`** using `androidx.navigation.compose.NavHost`: start destination `"lock"` rendering `LockScreen` wired to `LockViewModel(container.pinManager)`, navigating to `"recordings"` on `LockUiState.Unlocked`; `"recordings"` renders `RecordingsListScreen` wired to `RecordingsViewModel(container.recordingsRepository, RecordingStatus.isRecording, container.systemStatusChecker)` with a button to `"settings"`; `"settings"` renders `SettingsScreen` wired to `SettingsViewModel(container.syncPreferences, container.pinManager)`.
 - [ ] **Step 3: Update `MainActivity`** to build an `AppContainer` from `applicationContext` and call `setContent { AppNavHost(container) }`.
 - [ ] **Step 4: Build the app**
 
