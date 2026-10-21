@@ -58,6 +58,25 @@ fun SettingsScreen(
         }
     }
 
+    // Shared by the switch and the "Conectar con Google" button so both go through the
+    // same sign-in flow instead of duplicating it.
+    fun launchGoogleSignIn() {
+        if (activity != null) {
+            googleSignInHelper.signIn(activity, signInLauncher)
+        }
+    }
+
+    // Enabling sync requires a linked Google account: if one is already present, turn
+    // sync on directly; otherwise launch sign-in and let its success callback above
+    // turn sync on once the account is actually linked.
+    fun requestEnableDriveSync() {
+        if (googleSignInHelper.lastAccount(context) != null) {
+            viewModel.setDriveSyncEnabled(true)
+        } else {
+            launchGoogleSignIn()
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -74,13 +93,15 @@ fun SettingsScreen(
             Text(text = "Sincronizar grabaciones con Google Drive")
             Switch(
                 checked = isDriveSyncEnabled,
-                onCheckedChange = { enabled -> viewModel.setDriveSyncEnabled(enabled) },
+                onCheckedChange = { enabled ->
+                    if (enabled) requestEnableDriveSync() else viewModel.setDriveSyncEnabled(false)
+                },
             )
         }
         Spacer(Modifier.height(8.dp))
         if (activity != null) {
             Button(
-                onClick = { googleSignInHelper.signIn(activity, signInLauncher) },
+                onClick = { launchGoogleSignIn() },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Conectar con Google")
