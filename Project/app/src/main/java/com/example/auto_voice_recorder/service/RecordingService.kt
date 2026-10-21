@@ -50,8 +50,13 @@ class RecordingService : Service() {
     /**
      * Background scope for orchestrator calls, so Room I/O inside
      * [RecordingOrchestrator] never blocks the service's main thread.
+     * Limited to one concurrent coroutine: [RecordingOrchestrator] has no
+     * internal synchronization (unprotected `currentFile`/`RecordingStatus`
+     * access, non-thread-safe `MediaRecorder`), so a fast start->stop from
+     * back-to-back `onStartCommand` calls must still be serialized rather
+     * than run on two different pool threads at once.
      */
-    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val serviceScope = CoroutineScope(Dispatchers.IO.limitedParallelism(1) + SupervisorJob())
 
     override fun onBind(intent: Intent?): IBinder? = null
 
