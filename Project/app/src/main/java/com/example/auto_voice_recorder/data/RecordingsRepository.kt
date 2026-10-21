@@ -25,4 +25,11 @@ class RecordingsRepository(private val dao: RecordingDao) {
     suspend fun markSynced(id: Long) = dao.updateSyncState(id, SyncState.SYNCED)
 
     suspend fun pendingSyncRecordings(): List<Recording> = dao.pendingSync()
+
+    /**
+     * Makes every recording captured while Drive sync was off ([SyncState.DISABLED])
+     * eligible for upload ([SyncState.PENDING]). Called when the user turns sync on.
+     */
+    suspend fun promoteDisabledToPending(): Int =
+        dao.updateAllSyncStates(from = SyncState.DISABLED, to = SyncState.PENDING)
 }

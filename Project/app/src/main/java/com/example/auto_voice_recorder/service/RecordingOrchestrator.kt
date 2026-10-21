@@ -17,7 +17,9 @@ class RecordingOrchestrator(
     private val outputFileFor: () -> File,
     private val hasRecordPermission: () -> Boolean,
     private val syncEnabled: () -> Boolean,
-    private val clock: () -> Long = System::currentTimeMillis
+    private val clock: () -> Long = System::currentTimeMillis,
+    /** Invoked after a finished recording is persisted, with the sync state it was stored in. */
+    private val onRecordingSaved: (SyncState) -> Unit = {}
 ) {
 
     private var currentFile: File? = null
@@ -50,6 +52,7 @@ class RecordingOrchestrator(
                     initialState = initialState
                 )
             }
+            onRecordingSaved(initialState)
         }
     }
 }

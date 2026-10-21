@@ -20,6 +20,7 @@ class RecordingOrchestratorTest {
 
     private var permissionGranted = true
     private var syncIsEnabled = true
+    private val savedStates = mutableListOf<SyncState>()
 
     @Before
     fun setUp() {
@@ -27,6 +28,7 @@ class RecordingOrchestratorTest {
         recorder = FakeAudioRecorderController()
         permissionGranted = true
         syncIsEnabled = true
+        savedStates.clear()
         // Reset shared singleton state between tests.
         RecordingStatus.setRecording(false)
     }
@@ -37,8 +39,27 @@ class RecordingOrchestratorTest {
         outputFileFor = { outputFile },
         hasRecordPermission = { permissionGranted },
         syncEnabled = { syncIsEnabled },
-        clock = { 1234L }
+        clock = { 1234L },
+        onRecordingSaved = { savedStates += it }
     )
+
+    @Test
+    fun `stop notifies onRecordingSaved with the stored sync state so the caller can schedule a sync`() {
+        syncIsEnabled = true
+        val orchestrator = newOrchestrator()
+        orchestrator.start()
+
+        orchestrator.stop()
+
+        assertEquals(listOf(SyncState.PENDING), savedStates)
+    }
+
+    @Test
+    fun `stop while not recording does not notify onRecordingSaved`() {
+        newOrchestrator().stop()
+
+        assertTrue(savedStates.isEmpty())
+    }
 
     @Test
     fun `start begins a recording and flips RecordingStatus isRecording to true`() {

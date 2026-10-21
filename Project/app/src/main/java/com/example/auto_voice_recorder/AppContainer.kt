@@ -1,13 +1,13 @@
 package com.example.auto_voice_recorder
 
 import android.content.Context
-import androidx.room.Room
 import com.example.auto_voice_recorder.data.AppDatabase
 import com.example.auto_voice_recorder.data.RecordingsRepository
 import com.example.auto_voice_recorder.security.DefaultPinManager
 import com.example.auto_voice_recorder.security.EncryptedPrefsFactory
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.sync.DefaultSyncPreferences
+import com.example.auto_voice_recorder.sync.DriveSyncScheduler
 import com.example.auto_voice_recorder.sync.SyncPreferences
 import com.example.auto_voice_recorder.ui.recordings.DefaultSystemStatusChecker
 import com.example.auto_voice_recorder.ui.recordings.SystemStatusChecker
@@ -20,9 +20,8 @@ class AppContainer(context: Context) {
 
     private val appContext = context.applicationContext
 
-    val database: AppDatabase by lazy {
-        Room.databaseBuilder(appContext, AppDatabase::class.java, "recordings.db").build()
-    }
+    /** Shared process-wide instance, so UI Flows see writes made by the service/worker. */
+    val database: AppDatabase by lazy { AppDatabase.getInstance(appContext) }
 
     val recordingsRepository: RecordingsRepository by lazy {
         RecordingsRepository(database.recordingDao())
@@ -38,5 +37,10 @@ class AppContainer(context: Context) {
 
     val systemStatusChecker: SystemStatusChecker by lazy {
         DefaultSystemStatusChecker(appContext)
+    }
+
+    /** Enqueues a [com.example.auto_voice_recorder.sync.DriveSyncWorker] run. */
+    fun scheduleDriveSync() {
+        DriveSyncScheduler.enqueue(appContext)
     }
 }

@@ -98,7 +98,12 @@ fun AppNavHost(container: AppContainer, modifier: Modifier = Modifier) {
             val viewModel: SettingsViewModel = viewModel(
                 factory = viewModelFactory {
                     initializer {
-                        SettingsViewModel(container.syncPreferences, container.pinManager)
+                        SettingsViewModel(
+                            syncPreferences = container.syncPreferences,
+                            pinManager = container.pinManager,
+                            repository = container.recordingsRepository,
+                            scheduleDriveSync = container::scheduleDriveSync,
+                        )
                     }
                 },
             )

@@ -50,6 +50,19 @@ class RecordingsRepositoryTest {
     }
 
     @Test
+    fun `promoteDisabledToPending moves only DISABLED recordings to PENDING`() = runTest {
+        val disabled = repo.add("/rec/disabled.m4a", 1L, 1L, SyncState.DISABLED)
+        val synced = repo.add("/rec/synced.m4a", 2L, 2L, SyncState.SYNCED)
+
+        val changed = repo.promoteDisabledToPending()
+
+        assertEquals(1, changed)
+        val byId = repo.observeAll().first().associateBy { it.id }
+        assertEquals(SyncState.PENDING, byId.getValue(disabled).syncState)
+        assertEquals(SyncState.SYNCED, byId.getValue(synced).syncState)
+    }
+
+    @Test
     fun `pendingSyncRecordings returns only PENDING recordings`() = runTest {
         repo.add("/rec/pending.m4a", 1L, 1L, SyncState.PENDING)
         repo.add("/rec/synced.m4a", 2L, 2L, SyncState.SYNCED)

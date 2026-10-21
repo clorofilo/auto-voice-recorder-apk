@@ -16,6 +16,10 @@ interface RecordingDao {
     @Query("UPDATE recordings SET syncState = :state WHERE id = :id")
     suspend fun updateSyncState(id: Long, state: SyncState)
 
+    /** Moves every recording currently in [from] to [to]; returns the number of rows changed. */
+    @Query("UPDATE recordings SET syncState = :to WHERE syncState = :from")
+    suspend fun updateAllSyncStates(from: SyncState, to: SyncState): Int
+
     @Query("SELECT * FROM recordings ORDER BY createdAtEpochMs DESC")
     fun observeAll(): Flow<List<Recording>>
 

@@ -36,6 +36,20 @@ class FakeRecordingDao : RecordingDao {
         }
     }
 
+    override suspend fun updateAllSyncStates(from: SyncState, to: SyncState): Int {
+        var changed = 0
+        recordings.replaceAll { recording ->
+            if (recording.syncState == from) {
+                changed++
+                recording.copy(syncState = to)
+            } else {
+                recording
+            }
+        }
+        if (changed > 0) publish()
+        return changed
+    }
+
     override fun observeAll(): Flow<List<Recording>> = state
 
     override suspend fun pendingSync(): List<Recording> =

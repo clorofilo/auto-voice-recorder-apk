@@ -5,20 +5,20 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.room.Room
 import com.example.auto_voice_recorder.R
 import com.example.auto_voice_recorder.audio.MediaRecorderController
 import com.example.auto_voice_recorder.data.AppDatabase
 import com.example.auto_voice_recorder.data.RecordingsRepository
+import com.example.auto_voice_recorder.data.SyncState
 import com.example.auto_voice_recorder.security.EncryptedPrefsFactory
 import com.example.auto_voice_recorder.sync.DefaultSyncPreferences
+import com.example.auto_voice_recorder.sync.DriveSyncScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,7 +36,7 @@ class RecordingService : Service() {
     private val recorder by lazy { MediaRecorderController(applicationContext) }
 
     private val repository by lazy {
-        RecordingsRepository(getDatabase(applicationContext).recordingDao())
+        RecordingsRepository(AppDatabase.getInstance(applicationContext).recordingDao())
     }
 
     private val orchestrator by lazy {
@@ -45,7 +45,10 @@ class RecordingService : Service() {
             recorder = recorder,
             outputFileFor = ::createOutputFile,
             hasRecordPermission = ::hasRecordAudioPermission,
-            syncEnabled = ::isSyncEnabled
+            syncEnabled = ::isSyncEnabled,
+            onRecordingSaved = { state ->
+                if (state == SyncState.PENDING) DriveSyncScheduler.enqueue(applicationContext)
+            }
         )
     }
 
@@ -144,22 +147,5 @@ class RecordingService : Service() {
 
         private const val CHANNEL_ID = "recording_channel"
         private const val NOTIFICATION_ID = 1
-
-        @Volatile
-        private var databaseInstance: AppDatabase? = null
-
-        /**
-         * Lazily-created singleton [AppDatabase]. A full DI container is out of
-         * scope for this task and arrives later; this keeps RecordingService
-         * self-contained in the meantime.
-         */
-        private fun getDatabase(context: Context): AppDatabase =
-            databaseInstance ?: synchronized(this) {
-                databaseInstance ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "recordings.db"
-                ).build().also { databaseInstance = it }
-            }
     }
 }
