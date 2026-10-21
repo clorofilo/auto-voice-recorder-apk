@@ -10,16 +10,21 @@ class AudioPlayerController {
 
     private var mediaPlayer: MediaPlayer? = null
 
-    fun play(filePath: String, onCompletion: () -> Unit) {
+    fun play(filePath: String, onCompletion: () -> Unit, onError: (Exception) -> Unit = {}) {
         stop()
-        mediaPlayer = MediaPlayer().apply {
-            setDataSource(filePath)
-            setOnCompletionListener {
+        val player = MediaPlayer()
+        try {
+            player.setDataSource(filePath)
+            player.setOnCompletionListener {
                 stop()
                 onCompletion()
             }
-            prepare()
-            start()
+            player.prepare()
+            player.start()
+            mediaPlayer = player
+        } catch (e: Exception) {
+            player.release()
+            onError(e)
         }
     }
 

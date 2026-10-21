@@ -2,6 +2,7 @@ package com.example.auto_voice_recorder.ui.recordings
 
 import android.content.Intent
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -143,11 +144,24 @@ fun RecordingsListScreen(
                             val filePath = viewModel.filePathFor(recording.id)
                             if (filePath != null) {
                                 playingId = recording.id
-                                audioPlayer.play(filePath) {
-                                    if (playingId == recording.id) {
-                                        playingId = null
-                                    }
-                                }
+                                audioPlayer.play(
+                                    filePath = filePath,
+                                    onCompletion = {
+                                        if (playingId == recording.id) {
+                                            playingId = null
+                                        }
+                                    },
+                                    onError = {
+                                        if (playingId == recording.id) {
+                                            playingId = null
+                                        }
+                                        Toast.makeText(
+                                            context,
+                                            "No se pudo reproducir la grabación",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                    },
+                                )
                             }
                         }
                     },
