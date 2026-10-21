@@ -17,6 +17,8 @@ import com.example.auto_voice_recorder.R
 import com.example.auto_voice_recorder.audio.MediaRecorderController
 import com.example.auto_voice_recorder.data.AppDatabase
 import com.example.auto_voice_recorder.data.RecordingsRepository
+import com.example.auto_voice_recorder.security.EncryptedPrefsFactory
+import com.example.auto_voice_recorder.sync.DefaultSyncPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -100,8 +102,8 @@ class RecordingService : Service() {
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
 
-    /** Stubbed to always-on; wired to the real Drive-sync preference in Task 9. */
-    private fun isSyncEnabled(): Boolean = true
+    private fun isSyncEnabled(): Boolean =
+        DefaultSyncPreferences(EncryptedPrefsFactory().create(applicationContext)).isEnabled()
 
     private fun createOutputFile(): File {
         val recordingsDir = File(filesDir, "recordings").apply { mkdirs() }
