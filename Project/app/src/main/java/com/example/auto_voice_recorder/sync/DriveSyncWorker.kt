@@ -18,8 +18,12 @@ class DriveSyncWorker(
 
     override suspend fun doWork(): Result {
         val context = applicationContext
+        // No signed-in Google account is a stable precondition, not a
+        // transient failure — retrying would back off forever without ever
+        // resolving it. Treat it the same as syncEnabled() == false inside
+        // DriveSyncUseCase: nothing to sync right now, not an error.
         val account = GoogleSignInHelper(context).lastAccount(context)
-            ?: return Result.retry()
+            ?: return Result.success()
 
         val repository = RecordingsRepository(getDatabase(context).recordingDao())
         val uploader = GoogleDriveUploader(context, account)
