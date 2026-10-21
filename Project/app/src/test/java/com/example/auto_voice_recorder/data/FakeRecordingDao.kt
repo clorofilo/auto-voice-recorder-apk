@@ -23,6 +23,8 @@ class FakeRecordingDao : RecordingDao {
         return id
     }
 
+    override suspend fun findById(id: Long): Recording? = recordings.find { it.id == id }
+
     override suspend fun delete(id: Long) {
         recordings.removeAll { it.id == id }
         publish()

@@ -9,7 +9,25 @@ import org.junit.Test
 class RecordingsRepositoryTest {
 
     private val dao = FakeRecordingDao()
-    private val repo = RecordingsRepository(dao)
+    private val deletedFiles = mutableListOf<String>()
+    private val repo = RecordingsRepository(dao, deleteAudioFile = { deletedFiles += it })
+
+    @Test
+    fun `delete also deletes the recording's audio file and only that one`() = runTest {
+        repo.add("/rec/keep.m4a", 1L, 1L, SyncState.SYNCED)
+        val drop = repo.add("/rec/drop.m4a", 2L, 2L, SyncState.SYNCED)
+
+        repo.delete(drop)
+
+        assertEquals(listOf("/rec/drop.m4a"), deletedFiles)
+    }
+
+    @Test
+    fun `delete of an unknown id deletes no file`() = runTest {
+        repo.delete(999L)
+
+        assertTrue(deletedFiles.isEmpty())
+    }
 
     @Test
     fun `add stores a recording with the given initial sync state`() = runTest {

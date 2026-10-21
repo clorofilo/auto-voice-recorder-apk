@@ -1,8 +1,15 @@
 package com.example.auto_voice_recorder.data
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import java.io.File
 
-class RecordingsRepository(private val dao: RecordingDao) {
+class RecordingsRepository(
+    private val dao: RecordingDao,
+    /** Deletes the audio file at the given path; injectable so tests don't touch the disk. */
+    private val deleteAudioFile: (String) -> Unit = { path -> File(path).delete() }
+) {
 
     suspend fun add(
         filePath: String,
@@ -18,7 +25,14 @@ class RecordingsRepository(private val dao: RecordingDao) {
         )
     )
 
-    suspend fun delete(id: Long) = dao.delete(id)
+    /** Removes the recording's row and its audio file on disk. */
+    suspend fun delete(id: Long) {
+        val filePath = dao.findById(id)?.filePath
+        dao.delete(id)
+        if (filePath != null) {
+            withContext(Dispatchers.IO) { deleteAudioFile(filePath) }
+        }
+    }
 
     fun observeAll(): Flow<List<Recording>> = dao.observeAll()
 

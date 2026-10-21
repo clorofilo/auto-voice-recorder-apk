@@ -10,6 +10,9 @@ interface RecordingDao {
     @Insert
     suspend fun insert(recording: Recording): Long
 
+    @Query("SELECT * FROM recordings WHERE id = :id")
+    suspend fun findById(id: Long): Recording?
+
     @Query("DELETE FROM recordings WHERE id = :id")
     suspend fun delete(id: Long)
 
