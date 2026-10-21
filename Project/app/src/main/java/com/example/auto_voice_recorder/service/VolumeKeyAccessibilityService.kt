@@ -49,8 +49,17 @@ class VolumeKeyAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         // No ongoing state to tear down beyond the gesture detector itself,
-        // which only holds a single pending callback that becomes
-        // unreachable once this service stops receiving key events.
+        // which is cancelled in onUnbind below.
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        // The service is being disabled/torn down. If the user is mid-hold,
+        // cancel the pending scheduled callback so it can't fire
+        // sendStartRecording() against this dying instance afterwards.
+        if (::detector.isInitialized) {
+            detector.onVolumeDownKeyUp()
+        }
+        return super.onUnbind(intent)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {

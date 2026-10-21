@@ -71,6 +71,13 @@ class RecordingService : Service() {
             }
 
             ACTION_STOP_RECORDING -> {
+                // startForegroundService() always requires startForeground()
+                // within ~5s of service creation (API 29+), even when a
+                // fresh instance was created just to be told to stop (e.g.
+                // volume-up pressed while nothing is recording). Must
+                // happen synchronously on the main thread, same as the
+                // start branch above, before any backgrounded work.
+                startForegroundWithNotification()
                 serviceScope.launch {
                     orchestrator.stop()
                     stopForeground(STOP_FOREGROUND_REMOVE)
