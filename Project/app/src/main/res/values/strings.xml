@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">auto-voice-recorder</string>
+    <string name="notification_recording_text">Recording</string>
+    <string name="notification_channel_name">Recording</string>
 </resources>
