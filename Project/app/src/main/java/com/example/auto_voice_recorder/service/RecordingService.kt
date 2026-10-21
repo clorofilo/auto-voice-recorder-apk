@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.auto_voice_recorder.R
@@ -48,7 +49,8 @@ class RecordingService : Service() {
             syncEnabled = ::isSyncEnabled,
             onRecordingSaved = { state ->
                 if (state == SyncState.PENDING) DriveSyncScheduler.enqueue(applicationContext)
-            }
+            },
+            onError = { message, error -> Log.e(TAG, message, error) }
         )
     }
 
@@ -71,26 +73,54 @@ class RecordingService : Service() {
                 // Must happen synchronously on the main thread, promptly after
                 // onStartCommand — Android requires it, so it is not launched
                 // into the background scope below.
-                startForegroundWithNotification()
-                serviceScope.launch { orchestrator.start() }
+                if (!tryStartForegroundWithNotification()) {
+                    stopSelf(startId)
+                    return START_NOT_STICKY
+                }
+                serviceScope.launch {
+                    val recording = try {
+                        orchestrator.start()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Unexpected failure starting recording", e)
+                        RecordingStatus.setRecording(false)
+                        false
+                    }
+                    if (!recording) {
+                        // Permission missing or recorder failed: don't leave a
+                        // foreground "Recording" notification up with nothing recording.
+                        stopForegroundAndSelf()
+                    }
+                }
             }
 
             ACTION_STOP_RECORDING -> {
                 // startForegroundService() always requires startForeground()
                 // within ~5s of service creation (API 29+), even when a
-                // fresh instance was created just to be told to stop (e.g.
-                // volume-up pressed while nothing is recording). Must
+                // fresh instance was created just to be told to stop. Must
                 // happen synchronously on the main thread, same as the
                 // start branch above, before any backgrounded work.
-                startForegroundWithNotification()
+                if (!tryStartForegroundWithNotification()) {
+                    // Can't go foreground; still stop/persist the recording.
+                    Log.w(TAG, "Stopping without foreground notification")
+                }
                 serviceScope.launch {
-                    orchestrator.stop()
-                    stopForeground(STOP_FOREGROUND_REMOVE)
-                    stopSelf()
+                    try {
+                        orchestrator.stop()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Unexpected failure stopping recording", e)
+                        recorder.release()
+                        RecordingStatus.setRecording(false)
+                    }
+                    stopForegroundAndSelf()
                 }
             }
         }
         return START_NOT_STICKY
+    }
+
+    private fun stopForegroundAndSelf() {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     override fun onDestroy() {
@@ -112,6 +142,20 @@ class RecordingService : Service() {
         val recordingsDir = File(filesDir, "recordings").apply { mkdirs() }
         return File(recordingsDir, "recording_${System.currentTimeMillis()}.m4a")
     }
+
+    /**
+     * Wraps [startForegroundWithNotification] so a refusal from the system
+     * (e.g. ForegroundServiceStartNotAllowedException, or a SecurityException
+     * for the microphone FGS type without RECORD_AUDIO) doesn't crash the process.
+     */
+    private fun tryStartForegroundWithNotification(): Boolean =
+        try {
+            startForegroundWithNotification()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not start foreground recording service", e)
+            false
+        }
 
     private fun startForegroundWithNotification() {
         createNotificationChannel()
@@ -145,6 +189,7 @@ class RecordingService : Service() {
         const val ACTION_START_RECORDING = "com.example.auto_voice_recorder.action.START_RECORDING"
         const val ACTION_STOP_RECORDING = "com.example.auto_voice_recorder.action.STOP_RECORDING"
 
+        private const val TAG = "RecordingService"
         private const val CHANNEL_ID = "recording_channel"
         private const val NOTIFICATION_ID = 1
     }

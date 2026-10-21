@@ -55,6 +55,42 @@ class RecordingOrchestratorTest {
     }
 
     @Test
+    fun `start returns true when recording begins and false when permission is denied`() {
+        assertTrue(newOrchestrator().start())
+
+        RecordingStatus.setRecording(false)
+        permissionGranted = false
+        assertFalse(newOrchestrator().start())
+    }
+
+    @Test
+    fun `start that throws in the recorder is swallowed, releases the recorder and leaves isRecording false`() {
+        recorder.startError = IllegalStateException("mic busy")
+        val orchestrator = newOrchestrator()
+
+        val started = orchestrator.start()
+
+        assertFalse(started)
+        assertFalse(RecordingStatus.isRecording.value)
+        assertEquals(1, recorder.releaseCallCount)
+    }
+
+    @Test
+    fun `stop that throws in the recorder persists nothing, releases the recorder and resets isRecording`() =
+        runTest {
+            val orchestrator = newOrchestrator()
+            orchestrator.start()
+            recorder.stopError = RuntimeException("stop failed: no valid audio")
+
+            orchestrator.stop()
+
+            assertFalse(RecordingStatus.isRecording.value)
+            assertEquals(1, recorder.releaseCallCount)
+            assertTrue(repository.observeAll().first().isEmpty())
+            assertTrue(savedStates.isEmpty())
+        }
+
+    @Test
     fun `stop while not recording does not notify onRecordingSaved`() {
         newOrchestrator().stop()
 
