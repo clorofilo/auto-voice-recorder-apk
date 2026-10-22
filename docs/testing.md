@@ -119,3 +119,6 @@ Antes de dar por buena una versión, con el APK debug en un teléfono físico:
       abre la lista de grabaciones; un resultado calculado que coincida con el PIN no desbloquea.
 - [ ] Modo calculadora: girar la pantalla o pasar a segundo plano mientras se teclea reinicia la entrada a `0`;
       al desactivar el modo, el siguiente bloqueo vuelve a mostrar PIN/huella.
+- [ ] Modo calculadora en horizontal o ventana baja: girar a horizontal; el display sigue visible y la tecla
+      `=` es alcanzable (la botonera se compacta y, si aun así no cabe, la pantalla se desplaza). Volver a
+      vertical.

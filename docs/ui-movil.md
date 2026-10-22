@@ -121,6 +121,9 @@ C   ±   %   ÷
   `rememberSaveable`, para no escribir el PIN tecleado en el estado de instancia de Android.
 - Al girar la pantalla o al pasar la app a segundo plano (`ON_STOP`) la calculadora vuelve a `0`: una
   entrada a medias no queda visible al volver.
+- En horizontal o ventanas bajas la botonera se compacta (menos padding y separación, teclas de hasta
+  48 dp, tipografía del display menor) para que el display y `=` sigan visibles; si aun así no cabe, el
+  contenido se puede desplazar.
 - En este modo no se compone el teclado de PIN ni el botón de huella/Face, y no aparece ningún texto con
   el nombre de la app, «PIN» ni «desbloquear».
 
