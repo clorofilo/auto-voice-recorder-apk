@@ -86,6 +86,16 @@ Ajustes muestra: estado de conexión ("Conectado como … / No conectado a Googl
 si lo hay (en color de error), el último resultado de `SyncStatus` y, si hay cuenta y sync activa, el botón
 **Sincronizar ahora**. Cada grabación en la lista muestra su `SyncState`.
 
+## Bloqueo con calculadora
+
+Ajustes incluye el interruptor **Desbloquear con calculadora**, situado después del interruptor de vibración
+y antes de "Cambiar PIN". Solo se puede activar si ya existe un PIN y el valor se guarda en las preferencias
+cifradas (`calculator_lock_enabled`), así que sobrevive a reinicios.
+
+Debajo del interruptor se advierte de que, si se olvida el PIN, no hay forma de recuperar el acceso: la única
+salida es borrar los datos de la app, con pérdida de las grabaciones locales. El modo se aplica en el siguiente
+bloqueo, no en la pantalla que se está viendo.
+
 ## Lista de comprobación para una pantalla nueva
 
 - [ ] `XScreen` sin lógica + `XViewModel` con `StateFlow` y test JVM.

@@ -50,6 +50,7 @@ fun SettingsScreen(
 ) {
     val isDriveSyncEnabled by viewModel.isDriveSyncEnabled.collectAsState()
     val isVibrationEnabled by viewModel.isVibrationEnabled.collectAsState()
+    val isCalculatorLockEnabled by viewModel.isCalculatorLockEnabled.collectAsState()
     val syncMessage by SyncStatus.message.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
@@ -171,6 +172,25 @@ fun SettingsScreen(
                 onCheckedChange = viewModel::setVibrationEnabled,
             )
         }
+
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Desbloquear con calculadora")
+            Switch(
+                checked = isCalculatorLockEnabled,
+                onCheckedChange = viewModel::setCalculatorLockEnabled,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Al abrir la app aparecerá una calculadora. Escribe tu PIN y pulsa = para entrar. " +
+                "Si olvidas el PIN no hay forma de recuperar el acceso.",
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         Spacer(Modifier.height(32.dp))
 

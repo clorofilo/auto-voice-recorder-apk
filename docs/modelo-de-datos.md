@@ -65,6 +65,7 @@ Android Keystore). Lo crea `EncryptedPrefsFactory`.
 | `pin_salt` | String (Base64) | `DefaultPinManager` | 16 bytes aleatorios, nueva en cada `setPin` |
 | `drive_sync_enabled` | Boolean (def. `false`) | `DefaultSyncPreferences` | Copia a Drive activada |
 | `vibrate_on_recording_enabled` | Boolean (def. `false`) | `DefaultVibrationPreferences` | Vibrar al iniciar/parar |
+| `calculator_lock_enabled` | Boolean (def. `false`) | `DefaultLockModePreferences` | Bloqueo con calculadora activado |
 
 ## Ficheros
 

@@ -3,8 +3,10 @@ package com.example.auto_voice_recorder
 import android.content.Context
 import com.example.auto_voice_recorder.data.AppDatabase
 import com.example.auto_voice_recorder.data.RecordingsRepository
+import com.example.auto_voice_recorder.security.DefaultLockModePreferences
 import com.example.auto_voice_recorder.security.DefaultPinManager
 import com.example.auto_voice_recorder.security.EncryptedPrefsFactory
+import com.example.auto_voice_recorder.security.LockModePreferences
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.sync.DefaultSyncPreferences
 import com.example.auto_voice_recorder.service.DefaultVibrationPreferences
@@ -31,6 +33,10 @@ class AppContainer(context: Context) {
 
     val pinManager: PinManager by lazy {
         DefaultPinManager(EncryptedPrefsFactory().create(appContext))
+    }
+
+    val lockModePreferences: LockModePreferences by lazy {
+        DefaultLockModePreferences(EncryptedPrefsFactory().create(appContext))
     }
 
     val syncPreferences: SyncPreferences by lazy {

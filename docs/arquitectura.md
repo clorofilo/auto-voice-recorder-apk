@@ -79,6 +79,7 @@ Project/app/src/main/java/com/example/auto_voice_recorder/
 │   └── SyncStatus.kt                # object: último resultado, visible en Ajustes
 ├── security/
 │   ├── PinManager.kt  DefaultPinManager.kt  PinRules.kt
+│   ├── LockModePreferences.kt      # interfaz + DefaultLockModePreferences (modo calculadora)
 │   ├── EncryptedPrefsFactory.kt     # EncryptedSharedPreferences "app_lock_prefs"
 │   └── BiometricAuthHelper.kt
 └── ui/
@@ -154,8 +155,9 @@ escrituras hechas con la misma instancia; con varias, la lista de grabaciones se
 ## Inyección de dependencias
 
 `AppContainer` (creado perezosamente en `MainActivity`) construye y comparte `recordingsRepository`,
-`pinManager`, `syncPreferences`, `vibrationPreferences`, `systemStatusChecker` y expone
-`scheduleDriveSync()`. `AppNavHost` fabrica los `ViewModel` con `viewModelFactory { initializer { … } }`.
+`pinManager`, `syncPreferences`, `vibrationPreferences`, `lockModePreferences`, `systemStatusChecker` y
+expone `scheduleDriveSync()`. `AppNavHost` fabrica los `ViewModel` con
+`viewModelFactory { initializer { … } }`.
 `RecordingService` y `DriveSyncWorker` no tienen acceso al contenedor (los crea el sistema), así que
 construyen sus dependencias a partir del `applicationContext`, **reutilizando los mismos ficheros de
 preferencias cifradas y la misma instancia de Room**.
