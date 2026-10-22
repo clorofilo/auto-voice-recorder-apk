@@ -115,8 +115,8 @@ Reglas de validación como funciones puras, mensajes en la UI y errores de usuar
 ## Restricciones de producto (no negociables)
 
 - Siempre notificación visible mientras se graba; **no** hay modo oculto de grabación. La variante
-  `feat/calculator-lock-mode` puede mostrar el **bloqueo** como una calculadora; la grabación y su
-  notificación siguen visibles.
+  `feat/calculator-lock-mode` puede mostrar el **bloqueo** como una calculadora y el **launcher** como
+  Basic Calc con icono de calculadora; la grabación y su notificación siguen visibles.
 - El servicio de accesibilidad solo lee teclas de volumen (`canRetrieveWindowContent=false`).
 - No interceptar el botón de power (imposible) ni bajar de `minSdk 29`.
 - No cambiar el esquema de Room sin migración ([modelo-de-datos.md](modelo-de-datos.md#cambiar-el-esquema)).

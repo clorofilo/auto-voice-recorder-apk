@@ -104,8 +104,12 @@ defecto (así hay que tocar un solo sitio).
 
 Antes de dar por buena una versión, con el APK debug en un teléfono físico:
 
-- [ ] Permisos concedidos y servicio de accesibilidad activo; sin ellos aparece el aviso.
+- [ ] El launcher muestra **Basic Calc** con icono de calculadora (también el icono redondo/temático).
+- [ ] Permisos concedidos y servicio de accesibilidad activo; sin ellos aparece el aviso. En Accesibilidad
+      la app aparece como **Basic Calc** con la descripción honesta del servicio.
 - [ ] Con la pantalla **bloqueada**: mantener volumen abajo 2 s → notificación "Recording"; volumen arriba → se detiene.
+- [ ] La notificación de grabación muestra el icono de micrófono y el texto "Recording"; el nombre de la app
+      en la notificación es **Basic Calc**.
 - [ ] La grabación aparece en la lista, se reproduce y se elimina (el fichero desaparece).
 - [ ] Primer arranque: se pide crear PIN; tras salir de la app vuelve a pedir desbloqueo.
 - [ ] Ajustes: los botones son pulsables (no quedan bajo la barra de estado).

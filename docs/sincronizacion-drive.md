@@ -62,6 +62,10 @@ Necesitas una cuenta con acceso a [console.cloud.google.com](https://console.clo
    - Huella SHA-1: la de tu `debug.keystore` → `cd Project && ./gradlew signingReport` (variante `debug`).
 5. Esperar unos minutos a que se propague y reinstalar/relanzar la app.
 
+> El nombre visible en la pantalla de consentimiento (`Auto Voice Recorder`) es independiente del nombre
+> del launcher de esta variante (`Basic Calc`). El cliente OAuth se identifica por el paquete y la huella
+> SHA-1, no por el nombre visible; no hace falta cambiar la configuración de Google Cloud.
+
 Notas:
 
 - Cada máquina de desarrollo tiene su propia SHA-1 de depuración; para varias hay que crear un cliente

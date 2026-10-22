@@ -5,8 +5,9 @@
 La app graba audio, que es un dato especialmente sensible. Principios:
 
 1. **Transparencia**: siempre hay una notificación visible mientras se graba; no hay modo oculto de
-   grabación. En esta variante la *pantalla de bloqueo* puede mostrarse como una calculadora, pero la
-   grabación nunca se oculta. Esto no es negociable (ver más abajo).
+   grabación. En esta variante la *pantalla de bloqueo* puede mostrarse como una calculadora y el
+   launcher se llama **Basic Calc** con icono de calculadora, pero la grabación nunca se oculta. Esto no
+   es negociable (ver más abajo).
 2. **Mínimo privilegio**: solo los permisos y alcances imprescindibles.
 3. **Local primero**: el audio vive en el almacenamiento privado de la app; sale del teléfono solo si el
    usuario activa la copia a Drive.
@@ -20,9 +21,11 @@ power y cualquier ocultación de la grabación (patrón de *stalkerware*). **No 
 contribuciones que reduzcan la visibilidad de la grabación.**
 
 La versión principal (`main`) descartó el «modo calculadora». Esta variante lo incorpora como **bloqueo
-opcional con calculadora**, aprobado explícitamente para uso personal: solo cambia el aspecto de la
-pantalla de bloqueo, no oculta la notificación de grabación y no toca el servicio de accesibilidad ni
-`RecordingService`.
+opcional con calculadora** y se instala como **Basic Calc** con icono de calculadora, aprobado
+explícitamente para uso personal. El camuflaje afecta al launcher y a la pantalla de bloqueo, no a la
+grabación: la notificación sigue visible con el texto "Recording" y un icono de micrófono, y el servicio
+de accesibilidad mantiene su descripción honesta. No se toca `RecordingService` salvo el icono pequeño de
+la notificación, que pasa a ser un micrófono dedicado en lugar del icono de la app.
 
 ## Permisos
 

@@ -128,6 +128,14 @@ C   ±   %   ÷
 - En este modo no se compone el teclado de PIN ni el botón de huella/Face, y no aparece ningún texto con
   el nombre de la app, «PIN» ni «desbloquear».
 
+## Identidad del launcher (variante)
+
+En esta variante la app se instala como **Basic Calc** y usa un icono adaptativo de calculadora (fondo
+oscuro, cuerpo claro, teclas de colores y versión monocroma para iconos temáticos). El nombre del paquete
+no cambia: `com.example.auto_voice_recorder`. La notificación de grabación conserva el texto "Recording" y
+usa un icono de micrófono dedicado, para que la grabación siga siendo inequívoca aunque el launcher parezca
+una calculadora.
+
 ## Lista de comprobación para una pantalla nueva
 
 - [ ] `XScreen` sin lógica + `XViewModel` con `StateFlow` y test JVM.

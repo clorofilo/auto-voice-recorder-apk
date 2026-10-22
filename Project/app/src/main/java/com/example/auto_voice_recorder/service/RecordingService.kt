@@ -186,7 +186,7 @@ class RecordingService : Service() {
 
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentText(getString(R.string.notification_recording_text))
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification_recording)
             .setOngoing(true)
             .build()
 

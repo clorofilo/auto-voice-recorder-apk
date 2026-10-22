@@ -48,7 +48,7 @@ adb logcat -s DriveSync RecordingService     # ver errores de sincronización y 
 La app no funciona del todo sin estos pasos manuales:
 
 1. **Permisos**: micrófono y (Android 13+) notificaciones. La pantalla de grabaciones los solicita.
-2. **Servicio de accesibilidad**: *Ajustes → Accesibilidad → auto-voice-recorder* → activar. Sin él,
+2. **Servicio de accesibilidad**: *Ajustes → Accesibilidad → Basic Calc* → activar. Sin él,
    las teclas de volumen no hacen nada. La app muestra un aviso con un acceso directo.
 3. **PIN**: se crea en el primer arranque (mínimo 4 dígitos).
 4. **Google Drive** (opcional): configurar Google Cloud ([sincronizacion-drive.md](sincronizacion-drive.md))
