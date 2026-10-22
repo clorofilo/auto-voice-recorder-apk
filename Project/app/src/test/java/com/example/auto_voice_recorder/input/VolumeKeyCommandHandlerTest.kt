@@ -21,7 +21,7 @@ class VolumeKeyCommandHandlerTest {
         startCount = 0
         stopCount = 0
         handler = VolumeKeyCommandHandler(
-            detector = VolumeGestureDetector(holdDurationMs = 3000L, scheduler = scheduler),
+            detector = VolumeGestureDetector(holdDurationMs = 2000L, scheduler = scheduler),
             hasRecordPermission = { permissionGranted },
             isRecording = { recording },
             startRecording = { startCount++ },

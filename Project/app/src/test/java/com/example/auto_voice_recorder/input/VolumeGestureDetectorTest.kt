@@ -57,7 +57,7 @@ class VolumeGestureDetectorTest {
     @Before
     fun setUp() {
         scheduler = FakeGestureScheduler()
-        detector = VolumeGestureDetector(holdDurationMs = 3000L, scheduler = scheduler)
+        detector = VolumeGestureDetector(holdDurationMs = 2000L, scheduler = scheduler)
         holdThresholdReachedCallCount = 0
     }
 
@@ -69,7 +69,7 @@ class VolumeGestureDetectorTest {
     fun `onVolumeDownKeyDown schedules the hold callback after holdDurationMs`() {
         detector.onVolumeDownKeyDown(::onHoldThresholdReached)
 
-        assertEquals(3000L, scheduler.lastDelayMs)
+        assertEquals(2000L, scheduler.lastDelayMs)
     }
 
     @Test

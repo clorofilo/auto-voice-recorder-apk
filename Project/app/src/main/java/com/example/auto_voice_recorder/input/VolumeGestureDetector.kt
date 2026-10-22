@@ -7,7 +7,7 @@ package com.example.auto_voice_recorder.input
  * calls.
  */
 class VolumeGestureDetector(
-    private val holdDurationMs: Long = 3000L,
+    private val holdDurationMs: Long = 2000L,
     private val scheduler: GestureScheduler
 ) {
 
