@@ -2,6 +2,18 @@
 
 Fecha: 2026-10-21
 
+> **Documento histórico, parcialmente superado.** Para el estado actual ver
+> [arquitectura](../../arquitectura.md), [modelo de datos](../../modelo-de-datos.md) y
+> [sincronización con Drive](../../sincronizacion-drive.md). Cambios posteriores a este diseño:
+>
+> - El gesto de inicio es mantener volumen abajo **2 s** (no 3 s).
+> - La copia a Drive usa el alcance **`drive.file`** y una carpeta visible **`voice-recorder`** en *Mi unidad*
+>   (no `drive.appdata` / `appDataFolder`).
+> - Permiso `INTERNET` y `VIBRATE` añadidos; hay un ajuste opcional de **vibración** al iniciar/detener.
+> - Ajustes muestra el estado de conexión con Google, el último resultado de sincronización y un botón
+>   **Sincronizar ahora**.
+> - La actividad es *edge-to-edge* y el `NavHost` aplica `safeDrawingPadding()`.
+
 ## Objetivo y alcance
 
 App Android nativa (Kotlin + Jetpack Compose) de grabación de voz personal, pensada
