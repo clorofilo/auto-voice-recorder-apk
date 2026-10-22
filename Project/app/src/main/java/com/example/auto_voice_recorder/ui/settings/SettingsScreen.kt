@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.example.auto_voice_recorder.security.PinRules
 import com.example.auto_voice_recorder.security.PinValidation
 import com.example.auto_voice_recorder.sync.GoogleSignInHelper
+import com.example.auto_voice_recorder.sync.SyncStatus
 import com.example.auto_voice_recorder.ui.lock.AppLockController
 
 /**
@@ -48,6 +49,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val isDriveSyncEnabled by viewModel.isDriveSyncEnabled.collectAsState()
+    val syncMessage by SyncStatus.message.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
     val googleSignInHelper = remember(context) { GoogleSignInHelper(context) }
@@ -56,12 +58,21 @@ fun SettingsScreen(
     // (message, isError) shown under the PIN fields after an update attempt.
     var pinMessage by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
 
+    // Tracks the account itself, not its email: sessions created before requestEmail() was
+    // added (or accounts that hide it) have a null email but are still signed in.
+    var connectedAccount by remember { mutableStateOf(googleSignInHelper.lastAccount(context)) }
+    var signInError by remember { mutableStateOf<String?>(null) }
+
     val signInLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.setDriveSyncEnabled(true)
-        }
+        googleSignInHelper.accountFromResult(result.data)
+            .onSuccess { account ->
+                connectedAccount = account
+                signInError = null
+                viewModel.setDriveSyncEnabled(true)
+            }
+            .onFailure { signInError = googleSignInHelper.describeError(it) }
     }
 
     // Shared by the switch and the "Conectar con Google" button so both go through the
@@ -108,12 +119,41 @@ fun SettingsScreen(
             )
         }
         Spacer(Modifier.height(8.dp))
+        Text(
+            text = connectedAccount
+                ?.let { "Conectado como ${it.email ?: it.displayName ?: "cuenta de Google"}" }
+                ?: "No conectado a Google",
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        signInError?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        syncMessage?.let {
+            Text(text = it, style = MaterialTheme.typography.bodySmall)
+        }
+        Spacer(Modifier.height(8.dp))
+        if (connectedAccount != null && isDriveSyncEnabled) {
+            OutlinedButton(
+                onClick = {
+                    SyncStatus.report("Sincronizando…")
+                    viewModel.setDriveSyncEnabled(true)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Sincronizar ahora")
+            }
+            Spacer(Modifier.height(8.dp))
+        }
         if (activity != null) {
             Button(
                 onClick = { launchGoogleSignIn() },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Conectar con Google")
+                Text(if (connectedAccount == null) "Conectar con Google" else "Cambiar cuenta de Google")
             }
         }
 

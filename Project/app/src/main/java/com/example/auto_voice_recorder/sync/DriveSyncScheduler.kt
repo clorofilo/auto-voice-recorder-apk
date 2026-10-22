@@ -18,7 +18,12 @@ object DriveSyncScheduler {
 
     const val UNIQUE_WORK_NAME = "drive_sync"
 
-    fun enqueue(context: Context) {
+    /**
+     * @param replaceExisting cancels any queued or backing-off run and starts a fresh one now.
+     * Used for user-initiated syncs: with APPEND a run stuck in exponential backoff (up to
+     * hours) would keep the new one waiting behind it.
+     */
+    fun enqueue(context: Context, replaceExisting: Boolean = false) {
         val request = OneTimeWorkRequestBuilder<DriveSyncWorker>()
             .setConstraints(
                 Constraints.Builder()
@@ -38,7 +43,7 @@ object DriveSyncScheduler {
         // nothing is left); a previously failed/cancelled chain is replaced instead.
         WorkManager.getInstance(context.applicationContext).enqueueUniqueWork(
             UNIQUE_WORK_NAME,
-            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            if (replaceExisting) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.APPEND_OR_REPLACE,
             request
         )
     }

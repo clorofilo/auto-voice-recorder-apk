@@ -39,8 +39,11 @@ class AppContainer(context: Context) {
         DefaultSystemStatusChecker(appContext)
     }
 
-    /** Enqueues a [com.example.auto_voice_recorder.sync.DriveSyncWorker] run. */
+    /**
+     * Enqueues a [com.example.auto_voice_recorder.sync.DriveSyncWorker] run. Only used for
+     * user-initiated syncs from settings, so it replaces any run stuck in retry backoff.
+     */
     fun scheduleDriveSync() {
-        DriveSyncScheduler.enqueue(appContext)
+        DriveSyncScheduler.enqueue(appContext, replaceExisting = true)
     }
 }

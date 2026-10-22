@@ -24,7 +24,10 @@ class DriveSyncWorker(
         // resolving it. Treat it the same as syncEnabled() == false inside
         // DriveSyncUseCase: nothing to sync right now, not an error.
         val account = GoogleSignInHelper(context).lastAccount(context)
-            ?: return Result.success()
+        if (account == null) {
+            SyncStatus.report("Sincronización omitida: no hay cuenta de Google con permiso de Drive.")
+            return Result.success()
+        }
 
         val repository = RecordingsRepository(AppDatabase.getInstance(context).recordingDao())
         val uploader = GoogleDriveUploader(context, account)
@@ -39,6 +42,10 @@ class DriveSyncWorker(
         )
 
         val summary = useCase.syncPending()
+        // Don't overwrite the uploader's specific error message when something failed.
+        if (summary.failed == 0) {
+            SyncStatus.report("Última sincronización: ${summary.uploaded} subidas.")
+        }
         return if (summary.failed == 0) Result.success() else Result.retry()
     }
 }
