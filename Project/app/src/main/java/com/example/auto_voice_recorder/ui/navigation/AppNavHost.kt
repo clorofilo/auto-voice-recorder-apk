@@ -88,7 +88,9 @@ fun AppNavHost(
         composable(ROUTE_LOCK) {
             val viewModel: LockViewModel = viewModel(
                 factory = viewModelFactory {
-                    initializer { LockViewModel(container.pinManager) }
+                    initializer {
+                        LockViewModel(container.pinManager, container.lockModePreferences)
+                    }
                 },
             )
             LockScreen(
