@@ -85,6 +85,7 @@ Project/app/src/main/java/com/example/auto_voice_recorder/
 └── ui/
     ├── navigation/AppNavHost.kt     # grafo, bloqueo y safeDrawingPadding
     ├── lock/       LockScreen  LockViewModel  AppLockController
+    │               CalculatorEngine  CalculatorLockScreen
     ├── recordings/ RecordingsListScreen  RecordingsViewModel  RecordingUiModel
     │               AudioPlayerController  SystemStatusChecker
     ├── settings/   SettingsScreen  SettingsViewModel
@@ -129,6 +130,12 @@ en `ON_STOP` (salvo cambio de configuración) vuelve a bloquear y navega a `lock
 rutas protegidas (`recordings`, `settings`) no pintan nada mientras `isLocked` sea `true`. Los flujos que
 cubren brevemente la actividad (login de Google, diálogo de permisos) llaman antes a
 `skipNextBackgroundRelock()` para no perder su resultado.
+
+`LockScreen` elige la cara del bloqueo: si no hay PIN, la creación de PIN (prioridad absoluta); si el
+modo calculadora está activo (`LockModePreferences`), `CalculatorLockScreen`; si no, el PIN/biometría de
+siempre. La calculadora mantiene su estado en memoria (nunca en `rememberSaveable`) y lo reinicia en
+`ON_STOP`; al pulsar `=`, `CalculatorEngine` devuelve `typedCode` solo si el número se tecleó directamente
+y `LockViewModel.submitCalculatorCode` lo verifica con `PinManager`. Un código incorrecto no emite error.
 
 ## Estado compartido (singletons de proceso)
 

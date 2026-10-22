@@ -11,7 +11,8 @@ equivalentes para la capa de presentación Android.
   consume con `collectAsState()`.
 - **Una sola dirección**: estado hacia abajo, eventos hacia arriba (`onUnlocked`, `viewModel::setVibrationEnabled`).
 - **Estado de entrada de usuario** (texto de campos) en la propia pantalla con `rememberSaveable`; no
-  se guarda en el `ViewModel` salvo que otra lógica lo necesite.
+  se guarda en el `ViewModel` salvo que otra lógica lo necesite. La calculadora del bloqueo es la excepción
+  deliberada: usa `remember` para no guardar el PIN tecleado (ver «Bloqueo con calculadora»).
 - **Material 3** y `MaterialTheme` (colores y tipografía del tema; color dinámico si el sistema lo permite,
   con esquemas claro/oscuro en `ui/theme/`). No hardcodear colores en pantallas.
 - Pantallas y `ViewModel`s por funcionalidad: `ui/lock`, `ui/recordings`, `ui/settings`.
@@ -95,6 +96,33 @@ cifradas (`calculator_lock_enabled`), así que sobrevive a reinicios.
 Debajo del interruptor se advierte de que, si se olvida el PIN, no hay forma de recuperar el acceso: la única
 salida es borrar los datos de la app, con pérdida de las grabaciones locales. El modo se aplica en el siguiente
 bloqueo, no en la pantalla que se está viendo.
+
+Con el modo activo, `LockScreen` pinta `CalculatorLockScreen` en lugar del PIN/biometría: pantalla completa
+con `padding(16.dp)`, display alineado a la derecha (`displaySmall`, una línea, con elipsis si el número no
+cabe) y botonera de 5 filas × 4 columnas con separación de 8 dp y teclas de 64 dp de alto:
+
+```
+C   ±   %   ÷
+7   8   9   ×
+4   5   6   −
+1   2   3   +
+0   .   ⌫   =
+```
+
+- La calculadora es funcional: `+`, `−`, `×`, `÷` con ejecución inmediata (sin precedencia), decimales con
+  `.`, `C`, `⌫`, `±`, `%` y `=`. Si no existe PIN, la creación de PIN tiene prioridad y la calculadora no
+  se muestra.
+- Para desbloquear se teclea el PIN como número directo (solo dígitos) y se pulsa `=`. Un resultado
+  calculado nunca desbloquea, aunque coincida con el PIN.
+- Un código incorrecto no produce ningún cambio visible: ni mensaje, ni color de error, ni vibración, ni
+  log. La calculadora muestra su resultado y sigue como si nada.
+- No hay tope de dígitos: un PIN largo se puede teclear completo; si no cabe en el display se recorta
+  visualmente, pero la entrada sigue activa. El estado se guarda con `remember`, **no** con
+  `rememberSaveable`, para no escribir el PIN tecleado en el estado de instancia de Android.
+- Al girar la pantalla o al pasar la app a segundo plano (`ON_STOP`) la calculadora vuelve a `0`: una
+  entrada a medias no queda visible al volver.
+- En este modo no se compone el teclado de PIN ni el botón de huella/Face, y no aparece ningún texto con
+  el nombre de la app, «PIN» ni «desbloquear».
 
 ## Lista de comprobación para una pantalla nueva
 

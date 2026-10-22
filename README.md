@@ -4,9 +4,10 @@ App Android nativa (Kotlin + Jetpack Compose) de grabación de voz personal: not
 rápidas o grabaciones con consentimiento (entrevistas, reuniones propias, accesibilidad).
 
 > **Uso responsable.** La app **no** es una herramienta de vigilancia encubierta: muestra siempre una
-> notificación persistente mientras graba y no se disfraza de otra aplicación. Grabar a terceros sin
-> su conocimiento puede ser ilegal (p. ej. art. 197 del Código Penal en España). Ver
-> [docs/seguridad.md](docs/seguridad.md).
+> notificación persistente mientras graba. Esta variante incluye un **bloqueo opcional con calculadora**
+> que disfraza solo la *pantalla de bloqueo*, nunca la grabación: la notificación sigue visible y el gesto
+> de volumen funciona igual. Grabar a terceros sin su conocimiento puede ser ilegal (p. ej. art. 197 del
+> Código Penal en España). Ver [docs/seguridad.md](docs/seguridad.md).
 
 ## Qué hace
 
@@ -17,10 +18,13 @@ rápidas o grabaciones con consentimiento (entrevistas, reuniones propias, acces
 - **Copia opcional a Google Drive**, en una carpeta visible `voice-recorder` de *Mi unidad*.
 - **Vibración opcional** al iniciar (1 pulso corto) y al detener (2 pulsos cortos).
 - Acceso protegido con **biometría + PIN** (el PIN se crea en el primer arranque).
+- **Bloqueo opcional con calculadora**: la pantalla de bloqueo se muestra como una calculadora funcional y el
+  PIN se teclea como número, pulsando `=` para entrar (sin biometría en ese modo y sin recuperación de PIN).
 - Avisos de configuración: permiso de micrófono y servicio de accesibilidad.
 
 Fuera de alcance (decisiones tomadas, ver [spec de diseño](docs/superpowers/specs/2026-10-21-voice-recorder-design.md)):
-interceptar el botón de power (imposible en Android), "modo oculto" tipo calculadora y `minSdk` < 29.
+interceptar el botón de power (imposible en Android), la ocultación de la grabación (la notificación siempre
+queda visible) y `minSdk` < 29.
 
 ## Inicio rápido
 

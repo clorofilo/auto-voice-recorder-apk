@@ -35,10 +35,14 @@ private val KEYPAD_ROWS = listOf(
 )
 
 /**
- * Lock screen with a PIN pad and a biometric unlock button. When no PIN has been created
- * yet it shows a first-run "create PIN" flow (enter + confirm) instead, with no biometric
- * shortcut, so a PIN always exists before the app can be opened. Calls [onUnlocked] once
- * the [viewModel] reaches [LockUiState.Unlocked].
+ * Lock screen with a PIN pad and a biometric unlock button, or a working calculator when the
+ * optional calculator lock is enabled in Settings. When no PIN has been created yet it shows a
+ * first-run "create PIN" flow (enter + confirm) instead, with no biometric shortcut, so a PIN
+ * always exists before the app can be opened. Calls [onUnlocked] once the [viewModel] reaches
+ * [LockUiState.Unlocked].
+ *
+ * `needsPinSetup` takes priority over the calculator mode, so a missing PIN can never render
+ * the calculator.
  */
 @Composable
 fun LockScreen(
@@ -48,23 +52,31 @@ fun LockScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val needsPinSetup by viewModel.needsPinSetup.collectAsState()
+    val calculatorMode by viewModel.isCalculatorLockEnabled.collectAsState()
 
     LaunchedEffect(uiState) {
         if (uiState == LockUiState.Unlocked) onUnlocked()
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        if (needsPinSetup) {
-            CreatePinContent(viewModel = viewModel, uiState = uiState)
-        } else {
-            UnlockContent(viewModel = viewModel, uiState = uiState)
+    if (needsPinSetup || !calculatorMode) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (needsPinSetup) {
+                CreatePinContent(viewModel = viewModel, uiState = uiState)
+            } else {
+                UnlockContent(viewModel = viewModel, uiState = uiState)
+            }
         }
+    } else {
+        CalculatorLockScreen(
+            onEquals = viewModel::submitCalculatorCode,
+            modifier = modifier,
+        )
     }
 }
 

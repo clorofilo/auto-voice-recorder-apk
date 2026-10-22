@@ -25,7 +25,8 @@ Project/app/src/test/java/com/example/auto_voice_recorder/    # JVM, espeja los 
 ├── service/    RecordingOrchestratorTest  FakeAudioRecorderController
 ├── sync/       DriveSyncUseCaseTest       FakeDriveUploader
 └── ui/
-    ├── lock/       AppLockControllerTest  LockViewModelTest  FakePinManager
+    ├── lock/       AppLockControllerTest  LockViewModelTest  CalculatorEngineTest
+    │               FakePinManager  FakeLockModePreferences
     ├── recordings/ RecordingsViewModelTest  FakeSystemStatusChecker
     └── settings/   SettingsViewModelTest  FakeSyncPreferences  FakeVibrationPreferences
 ```
@@ -71,7 +72,7 @@ fun `setDriveSyncEnabled(true) persists through syncPreferences and updates isDr
 | Orquestador (permiso, fallos, persistencia) | `GoogleSignInHelper`, `GoogleDriveUploader`, `DriveSyncWorker` |
 | Caso de uso de subida | `DriveSyncScheduler`, `AppNavHost` y todas las pantallas Compose |
 | PIN, reglas del PIN, bloqueo de la app | `BiometricAuthHelper`, vibración, insets |
-| `ViewModel`s de bloqueo, grabaciones y ajustes | Flujo completo con pantalla bloqueada |
+| Motor de la calculadora (`CalculatorEngine`) y `ViewModel`s de bloqueo, grabaciones y ajustes | Flujo completo con pantalla bloqueada |
 
 No hay umbral de cobertura configurado; el criterio es **toda lógica nueva con test en JVM**, y un
 envoltorio fino solo si no tiene lógica.
@@ -111,3 +112,10 @@ Antes de dar por buena una versión, con el APK debug en un teléfono físico:
 - [ ] Vibración activada: 1 pulso corto al iniciar, 2 al detener; desactivada: ninguna.
 - [ ] Drive: *Conectar con Google* muestra "Conectado como…"; *Sincronizar ahora* pasa las grabaciones a `SYNCED`
       y aparecen en la carpeta `voice-recorder` de Drive.
+- [ ] Modo calculadora: activar **Desbloquear con calculadora** en Ajustes y comprobar el aviso de PIN
+      olvidado; al volver a la app aparece solo la calculadora; `2 + 2 =` → `4`, `7 ÷ 2 =` → `3.5`,
+      `1 ÷ 0 =` → `Error`, `C`, `⌫`, `±` y `%` funcionan.
+- [ ] Modo calculadora: un código incorrecto y `=` no muestra error ni abre la app; el PIN correcto y `=`
+      abre la lista de grabaciones; un resultado calculado que coincida con el PIN no desbloquea.
+- [ ] Modo calculadora: girar la pantalla o pasar a segundo plano mientras se teclea reinicia la entrada a `0`;
+      al desactivar el modo, el siguiente bloqueo vuelve a mostrar PIN/huella.
