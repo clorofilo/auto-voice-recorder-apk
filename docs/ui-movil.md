@@ -98,8 +98,9 @@ salida es borrar los datos de la app, con pérdida de las grabaciones locales. E
 bloqueo, no en la pantalla que se está viendo.
 
 Con el modo activo, `LockScreen` pinta `CalculatorLockScreen` en lugar del PIN/biometría: pantalla completa
-con `padding(16.dp)`, display alineado a la derecha (`displaySmall`, una línea, con elipsis si el número no
-cabe) y botonera de 5 filas × 4 columnas con separación de 8 dp y teclas de 64 dp de alto:
+con `padding(16.dp)` (objetivo en vertical), display alineado a la derecha (`displaySmall`, una línea, con
+elipsis si el número no cabe) y botonera de 5 filas × 4 columnas con separación de 8 dp y teclas de 64 dp
+de alto:
 
 ```
 C   ±   %   ÷
@@ -121,9 +122,9 @@ C   ±   %   ÷
   `rememberSaveable`, para no escribir el PIN tecleado en el estado de instancia de Android.
 - Al girar la pantalla o al pasar la app a segundo plano (`ON_STOP`) la calculadora vuelve a `0`: una
   entrada a medias no queda visible al volver.
-- En horizontal o ventanas bajas la botonera se compacta (menos padding y separación, teclas de hasta
-  48 dp, tipografía del display menor) para que el display y `=` sigan visibles; si aun así no cabe, el
-  contenido se puede desplazar.
+- En horizontal o ventanas bajas la botonera se compacta (menos padding, separación y tipografía del
+  display, y teclas que bajan hasta un mínimo de 48 dp) para que el display y `=` sigan visibles; si aun
+  así no cabe, el contenido se puede desplazar.
 - En este modo no se compone el teclado de PIN ni el botón de huella/Face, y no aparece ningún texto con
   el nombre de la app, «PIN» ni «desbloquear».
 
