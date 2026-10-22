@@ -3,6 +3,7 @@ package com.example.auto_voice_recorder.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.auto_voice_recorder.data.RecordingsRepository
+import com.example.auto_voice_recorder.security.LockModePreferences
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.security.PinRules
 import com.example.auto_voice_recorder.service.VibrationPreferences
@@ -13,11 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Drives the settings screen: Drive sync toggle, vibration toggle and PIN change. */
+/** Drives the settings screen: Drive sync toggle, vibration toggle, calculator lock and PIN change. */
 class SettingsViewModel(
     private val syncPreferences: SyncPreferences,
     private val vibrationPreferences: VibrationPreferences,
     private val pinManager: PinManager,
+    private val lockModePreferences: LockModePreferences,
     private val repository: RecordingsRepository,
     private val scheduleDriveSync: () -> Unit,
 ) : ViewModel() {
@@ -31,6 +33,20 @@ class SettingsViewModel(
     fun setVibrationEnabled(enabled: Boolean) {
         vibrationPreferences.setEnabled(enabled)
         _isVibrationEnabled.value = enabled
+    }
+
+    private val _isCalculatorLockEnabled =
+        MutableStateFlow(lockModePreferences.isCalculatorLockEnabled())
+    val isCalculatorLockEnabled: StateFlow<Boolean> = _isCalculatorLockEnabled.asStateFlow()
+
+    /**
+     * Enables or disables the calculator lock. Enabling requires an existing PIN, because the
+     * calculator is the only way in while the mode is active.
+     */
+    fun setCalculatorLockEnabled(enabled: Boolean) {
+        if (enabled && !pinManager.isPinSet()) return
+        lockModePreferences.setCalculatorLockEnabled(enabled)
+        _isCalculatorLockEnabled.value = enabled
     }
 
     fun setDriveSyncEnabled(enabled: Boolean) {

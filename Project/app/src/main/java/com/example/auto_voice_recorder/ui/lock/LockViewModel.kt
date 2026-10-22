@@ -1,6 +1,7 @@
 package com.example.auto_voice_recorder.ui.lock
 
 import androidx.lifecycle.ViewModel
+import com.example.auto_voice_recorder.security.LockModePreferences
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.security.PinRules
 import com.example.auto_voice_recorder.security.PinValidation
@@ -21,7 +22,10 @@ sealed interface LockUiState {
  * Drives the lock screen: checks PIN attempts and biometric success against the app lock
  * state, and — when no PIN exists yet — the first-run PIN creation flow.
  */
-class LockViewModel(private val pinManager: PinManager) : ViewModel() {
+class LockViewModel(
+    private val pinManager: PinManager,
+    private val lockModePreferences: LockModePreferences,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<LockUiState>(LockUiState.Idle)
     val uiState: StateFlow<LockUiState> = _uiState.asStateFlow()
@@ -30,6 +34,12 @@ class LockViewModel(private val pinManager: PinManager) : ViewModel() {
 
     /** True until a PIN has been created; the lock screen shows the create-PIN UI meanwhile. */
     val needsPinSetup: StateFlow<Boolean> = _needsPinSetup.asStateFlow()
+
+    private val _isCalculatorLockEnabled =
+        MutableStateFlow(lockModePreferences.isCalculatorLockEnabled())
+
+    /** True when the lock screen should render the calculator instead of the PIN/biometric UI. */
+    val isCalculatorLockEnabled: StateFlow<Boolean> = _isCalculatorLockEnabled.asStateFlow()
 
     fun submitPin(pin: String) {
         _uiState.value = if (pinManager.verifyPin(pin)) {
@@ -61,5 +71,15 @@ class LockViewModel(private val pinManager: PinManager) : ViewModel() {
 
     fun onBiometricSuccess() {
         _uiState.value = LockUiState.Unlocked
+    }
+
+    /**
+     * Verifies a code produced by the calculator lock. A wrong code must be indistinguishable
+     * from a normal calculation, so it leaves [uiState] untouched instead of emitting Error.
+     */
+    fun submitCalculatorCode(code: String?) {
+        if (code != null && pinManager.verifyPin(code)) {
+            _uiState.value = LockUiState.Unlocked
+        }
     }
 }

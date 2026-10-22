@@ -3,10 +3,12 @@ package com.example.auto_voice_recorder.ui.settings
 import com.example.auto_voice_recorder.data.FakeRecordingDao
 import com.example.auto_voice_recorder.data.RecordingsRepository
 import com.example.auto_voice_recorder.data.SyncState
+import com.example.auto_voice_recorder.security.LockModePreferences
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.security.PinValidation
 import com.example.auto_voice_recorder.service.VibrationPreferences
 import com.example.auto_voice_recorder.sync.SyncPreferences
+import com.example.auto_voice_recorder.ui.lock.FakeLockModePreferences
 import com.example.auto_voice_recorder.ui.lock.FakePinManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,10 +47,12 @@ class SettingsViewModelTest {
         syncPreferences: SyncPreferences = FakeSyncPreferences(),
         pinManager: PinManager = FakePinManager(),
         vibrationPreferences: VibrationPreferences = FakeVibrationPreferences(),
+        lockModePreferences: LockModePreferences = FakeLockModePreferences(),
     ) = SettingsViewModel(
         syncPreferences = syncPreferences,
         vibrationPreferences = vibrationPreferences,
         pinManager = pinManager,
+        lockModePreferences = lockModePreferences,
         repository = repository,
         scheduleDriveSync = { scheduleCallCount++ },
     )
@@ -108,6 +112,54 @@ class SettingsViewModelTest {
 
         assertTrue(vibrationPreferences.isEnabled())
         assertTrue(viewModel.isVibrationEnabled.value)
+    }
+
+    @Test
+    fun `isCalculatorLockEnabled reflects the stored preference`() {
+        val viewModel = newViewModel(
+            lockModePreferences = FakeLockModePreferences(enabled = true),
+        )
+
+        assertTrue(viewModel.isCalculatorLockEnabled.value)
+    }
+
+    @Test
+    fun `setCalculatorLockEnabled(true) persists and updates the state`() {
+        val preferences = FakeLockModePreferences(enabled = false)
+        val viewModel = newViewModel(
+            pinManager = FakePinManager(pin = "1234"),
+            lockModePreferences = preferences,
+        )
+
+        viewModel.setCalculatorLockEnabled(true)
+
+        assertTrue(preferences.isCalculatorLockEnabled())
+        assertTrue(viewModel.isCalculatorLockEnabled.value)
+    }
+
+    @Test
+    fun `setCalculatorLockEnabled(false) persists and updates the state`() {
+        val preferences = FakeLockModePreferences(enabled = true)
+        val viewModel = newViewModel(lockModePreferences = preferences)
+
+        viewModel.setCalculatorLockEnabled(false)
+
+        assertFalse(preferences.isCalculatorLockEnabled())
+        assertFalse(viewModel.isCalculatorLockEnabled.value)
+    }
+
+    @Test
+    fun `setCalculatorLockEnabled(true) is ignored when no PIN is set`() {
+        val preferences = FakeLockModePreferences(enabled = false)
+        val viewModel = newViewModel(
+            pinManager = FakePinManager(pin = null),
+            lockModePreferences = preferences,
+        )
+
+        viewModel.setCalculatorLockEnabled(true)
+
+        assertFalse(preferences.isCalculatorLockEnabled())
+        assertFalse(viewModel.isCalculatorLockEnabled.value)
     }
 
     @Test

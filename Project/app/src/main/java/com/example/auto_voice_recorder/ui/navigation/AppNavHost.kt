@@ -88,7 +88,9 @@ fun AppNavHost(
         composable(ROUTE_LOCK) {
             val viewModel: LockViewModel = viewModel(
                 factory = viewModelFactory {
-                    initializer { LockViewModel(container.pinManager) }
+                    initializer {
+                        LockViewModel(container.pinManager, container.lockModePreferences)
+                    }
                 },
             )
             LockScreen(
@@ -146,6 +148,7 @@ fun AppNavHost(
                             syncPreferences = container.syncPreferences,
                             vibrationPreferences = container.vibrationPreferences,
                             pinManager = container.pinManager,
+                            lockModePreferences = container.lockModePreferences,
                             repository = container.recordingsRepository,
                             scheduleDriveSync = container::scheduleDriveSync,
                         )

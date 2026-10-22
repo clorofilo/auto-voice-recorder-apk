@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">auto-voice-recorder</string>
+    <string name="app_name">Basic Calc</string>
     <string name="notification_recording_text">Recording</string>
     <string name="notification_channel_name">Recording</string>
     <string name="accessibility_service_description">Lets you start and stop voice recordings using the volume keys: hold volume down for 2 seconds to start recording, press volume up to stop. This service only reads volume key presses and does not read or control anything else on your screen.</string>

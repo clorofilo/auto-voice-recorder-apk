@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -50,6 +52,7 @@ fun SettingsScreen(
 ) {
     val isDriveSyncEnabled by viewModel.isDriveSyncEnabled.collectAsState()
     val isVibrationEnabled by viewModel.isVibrationEnabled.collectAsState()
+    val isCalculatorLockEnabled by viewModel.isCalculatorLockEnabled.collectAsState()
     val syncMessage by SyncStatus.message.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
@@ -101,6 +104,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
         Text(text = "Ajustes", style = MaterialTheme.typography.titleLarge)
@@ -171,6 +175,25 @@ fun SettingsScreen(
                 onCheckedChange = viewModel::setVibrationEnabled,
             )
         }
+
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Desbloquear con calculadora")
+            Switch(
+                checked = isCalculatorLockEnabled,
+                onCheckedChange = viewModel::setCalculatorLockEnabled,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Al abrir la app aparecerá una calculadora. Escribe tu PIN y pulsa = para entrar. " +
+                "Si olvidas el PIN no hay forma de recuperar el acceso.",
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         Spacer(Modifier.height(32.dp))
 
