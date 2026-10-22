@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -81,7 +82,8 @@ fun AppNavHost(
     NavHost(
         navController = navController,
         startDestination = ROUTE_LOCK,
-        modifier = modifier,
+        // MainActivity is edge-to-edge: keep every screen out of the status/navigation bars and IME.
+        modifier = modifier.safeDrawingPadding(),
     ) {
         composable(ROUTE_LOCK) {
             val viewModel: LockViewModel = viewModel(
