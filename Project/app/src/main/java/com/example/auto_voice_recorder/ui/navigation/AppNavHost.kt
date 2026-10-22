@@ -144,6 +144,7 @@ fun AppNavHost(
                     initializer {
                         SettingsViewModel(
                             syncPreferences = container.syncPreferences,
+                            vibrationPreferences = container.vibrationPreferences,
                             pinManager = container.pinManager,
                             repository = container.recordingsRepository,
                             scheduleDriveSync = container::scheduleDriveSync,

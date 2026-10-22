@@ -49,6 +49,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val isDriveSyncEnabled by viewModel.isDriveSyncEnabled.collectAsState()
+    val isVibrationEnabled by viewModel.isVibrationEnabled.collectAsState()
     val syncMessage by SyncStatus.message.collectAsState()
     val context = LocalContext.current
     val activity = context as? Activity
@@ -155,6 +156,20 @@ fun SettingsScreen(
             ) {
                 Text(if (connectedAccount == null) "Conectar con Google" else "Cambiar cuenta de Google")
             }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Vibrar al iniciar y detener la grabación")
+            Switch(
+                checked = isVibrationEnabled,
+                onCheckedChange = viewModel::setVibrationEnabled,
+            )
         }
 
         Spacer(Modifier.height(32.dp))

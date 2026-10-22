@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -24,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -78,6 +81,12 @@ class RecordingService : Service() {
                     return START_NOT_STICKY
                 }
                 serviceScope.launch {
+                    // Vibrate before the recorder opens the mic (haptics can be muted while
+                    // recording) and let the motor finish so it isn't captured in the audio.
+                    if (hasRecordAudioPermission() && !RecordingStatus.isRecording.value) {
+                        vibrate(START_VIBRATION)
+                        delay(START_VIBRATION_SETTLE_MS)
+                    }
                     val recording = try {
                         orchestrator.start()
                     } catch (e: Exception) {
@@ -104,6 +113,7 @@ class RecordingService : Service() {
                     Log.w(TAG, "Stopping without foreground notification")
                 }
                 serviceScope.launch {
+                    val wasRecording = RecordingStatus.isRecording.value
                     try {
                         orchestrator.stop()
                     } catch (e: Exception) {
@@ -111,11 +121,25 @@ class RecordingService : Service() {
                         recorder.release()
                         RecordingStatus.setRecording(false)
                     }
+                    // After the recorder is released, so the buzz is neither muted nor recorded.
+                    if (wasRecording) vibrate(STOP_VIBRATION)
                     stopForegroundAndSelf()
                 }
             }
         }
         return START_NOT_STICKY
+    }
+
+    /** Plays [pattern] if the user enabled vibration in settings; never throws. */
+    private fun vibrate(pattern: LongArray) {
+        try {
+            if (!DefaultVibrationPreferences(EncryptedPrefsFactory().create(applicationContext)).isEnabled()) return
+            val vibrator = getSystemService(Vibrator::class.java) ?: return
+            if (!vibrator.hasVibrator()) return
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not vibrate", e)
+        }
     }
 
     private fun stopForegroundAndSelf() {
@@ -192,5 +216,10 @@ class RecordingService : Service() {
         private const val TAG = "RecordingService"
         private const val CHANNEL_ID = "recording_channel"
         private const val NOTIFICATION_ID = 1
+
+        // Waveforms are {pause, on, pause, on...}: one short pulse to start, two short to stop.
+        private val START_VIBRATION = longArrayOf(0, 100)
+        private val STOP_VIBRATION = longArrayOf(0, 100, 100, 100)
+        private const val START_VIBRATION_SETTLE_MS = 200L
     }
 }

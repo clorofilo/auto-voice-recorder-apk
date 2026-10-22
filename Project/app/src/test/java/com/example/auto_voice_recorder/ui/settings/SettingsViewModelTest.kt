@@ -5,6 +5,7 @@ import com.example.auto_voice_recorder.data.RecordingsRepository
 import com.example.auto_voice_recorder.data.SyncState
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.security.PinValidation
+import com.example.auto_voice_recorder.service.VibrationPreferences
 import com.example.auto_voice_recorder.sync.SyncPreferences
 import com.example.auto_voice_recorder.ui.lock.FakePinManager
 import kotlinx.coroutines.Dispatchers
@@ -43,8 +44,10 @@ class SettingsViewModelTest {
     private fun newViewModel(
         syncPreferences: SyncPreferences = FakeSyncPreferences(),
         pinManager: PinManager = FakePinManager(),
+        vibrationPreferences: VibrationPreferences = FakeVibrationPreferences(),
     ) = SettingsViewModel(
         syncPreferences = syncPreferences,
+        vibrationPreferences = vibrationPreferences,
         pinManager = pinManager,
         repository = repository,
         scheduleDriveSync = { scheduleCallCount++ },
@@ -94,6 +97,18 @@ class SettingsViewModelTest {
             assertEquals(SyncState.DISABLED, repository.observeAll().first().single().syncState)
             assertEquals(0, scheduleCallCount)
         }
+
+    @Test
+    fun `isVibrationEnabled reflects the stored value and setVibrationEnabled persists it`() {
+        val vibrationPreferences = FakeVibrationPreferences(enabled = false)
+        val viewModel = newViewModel(vibrationPreferences = vibrationPreferences)
+        assertFalse(viewModel.isVibrationEnabled.value)
+
+        viewModel.setVibrationEnabled(true)
+
+        assertTrue(vibrationPreferences.isEnabled())
+        assertTrue(viewModel.isVibrationEnabled.value)
+    }
 
     @Test
     fun `changePin updates the PinManager so the new PIN verifies and the old one does not`() {

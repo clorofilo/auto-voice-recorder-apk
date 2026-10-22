@@ -7,6 +7,8 @@ import com.example.auto_voice_recorder.security.DefaultPinManager
 import com.example.auto_voice_recorder.security.EncryptedPrefsFactory
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.sync.DefaultSyncPreferences
+import com.example.auto_voice_recorder.service.DefaultVibrationPreferences
+import com.example.auto_voice_recorder.service.VibrationPreferences
 import com.example.auto_voice_recorder.sync.DriveSyncScheduler
 import com.example.auto_voice_recorder.sync.SyncPreferences
 import com.example.auto_voice_recorder.ui.recordings.DefaultSystemStatusChecker
@@ -33,6 +35,10 @@ class AppContainer(context: Context) {
 
     val syncPreferences: SyncPreferences by lazy {
         DefaultSyncPreferences(EncryptedPrefsFactory().create(appContext))
+    }
+
+    val vibrationPreferences: VibrationPreferences by lazy {
+        DefaultVibrationPreferences(EncryptedPrefsFactory().create(appContext))
     }
 
     val systemStatusChecker: SystemStatusChecker by lazy {

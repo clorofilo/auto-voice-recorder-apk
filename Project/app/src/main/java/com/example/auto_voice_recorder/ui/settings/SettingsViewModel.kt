@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.auto_voice_recorder.data.RecordingsRepository
 import com.example.auto_voice_recorder.security.PinManager
 import com.example.auto_voice_recorder.security.PinRules
+import com.example.auto_voice_recorder.service.VibrationPreferences
 import com.example.auto_voice_recorder.security.PinValidation
 import com.example.auto_voice_recorder.sync.SyncPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,9 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** Drives the settings screen: Drive sync toggle and PIN change. */
+/** Drives the settings screen: Drive sync toggle, vibration toggle and PIN change. */
 class SettingsViewModel(
     private val syncPreferences: SyncPreferences,
+    private val vibrationPreferences: VibrationPreferences,
     private val pinManager: PinManager,
     private val repository: RecordingsRepository,
     private val scheduleDriveSync: () -> Unit,
@@ -22,6 +24,14 @@ class SettingsViewModel(
 
     private val _isDriveSyncEnabled = MutableStateFlow(syncPreferences.isEnabled())
     val isDriveSyncEnabled: StateFlow<Boolean> = _isDriveSyncEnabled.asStateFlow()
+
+    private val _isVibrationEnabled = MutableStateFlow(vibrationPreferences.isEnabled())
+    val isVibrationEnabled: StateFlow<Boolean> = _isVibrationEnabled.asStateFlow()
+
+    fun setVibrationEnabled(enabled: Boolean) {
+        vibrationPreferences.setEnabled(enabled)
+        _isVibrationEnabled.value = enabled
+    }
 
     fun setDriveSyncEnabled(enabled: Boolean) {
         syncPreferences.setEnabled(enabled)
